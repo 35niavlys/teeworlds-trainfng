@@ -6,6 +6,8 @@ data/
 bundle/
 !/other/bundle/
 
+build/
+
 .ninja_deps
 .ninja_log
 CMakeCache.txt

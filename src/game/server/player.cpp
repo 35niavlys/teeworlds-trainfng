@@ -194,7 +194,7 @@ void CPlayer::Tick()
 
 	if(!GameServer()->m_World.m_Paused)
 	{
-		if(!m_pCharacter && m_DieTick+Server()->TickSpeed()*3 <= Server()->Tick())
+		if(!m_pCharacter)
 			m_Spawning = true;
 
 		if(m_pCharacter)
@@ -555,6 +555,8 @@ void CPlayer::TryRespawn()
 
 	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
 		return;
+	if(m_SpawnPos.x != 0.0f && m_SpawnPos.y != 0.0f)
+		SpawnPos = m_SpawnPos;
 
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 

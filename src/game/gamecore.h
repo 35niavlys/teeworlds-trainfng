@@ -188,6 +188,8 @@ class CCharacterCore
 public:
 	vec2 m_Pos;
 	vec2 m_Vel;
+	vec2 m_SpawnPos;
+	vec2 m_SpawnVel;
 	bool m_Hook;
 	bool m_Collision;
 
@@ -234,6 +236,9 @@ public:
 	void LimitForce(vec2 *Force);
 	void ApplyForce(vec2 Force);
 
+        void Lock() { lock_wait(m_GameCoreLock); }
+	void UnLock() { lock_unlock(m_GameCoreLock); }
+
 private:
 
 	CTeamsCore *m_pTeams;
@@ -268,6 +273,8 @@ private:
 	int m_TileSIndexB;
 	int m_TileSFlagsB;
 	bool IsRightTeam(int MapIndex);
+
+	LOCK m_GameCoreLock;
 };
 
 //input count

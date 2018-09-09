@@ -69,6 +69,8 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 	m_Collision = true;
 	m_JumpedTotal = 0;
 	m_Jumps = 2;
+
+	m_GameCoreLock = lock_create();
 }
 
 void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams, std::map<int, std::vector<vec2> > *pTeleOuts)
@@ -83,6 +85,8 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 	m_Collision = true;
 	m_JumpedTotal = 0;
 	m_Jumps = 2;
+
+	m_GameCoreLock = lock_create();
 }
 
 void CCharacterCore::Reset()
@@ -582,6 +586,11 @@ void CCharacterCore::Tick(bool UseInput, bool IsClient)
 	// clamp the velocity to something sane
 	if(length(m_Vel) > 6000)
 		m_Vel = normalize(m_Vel) * 6000;
+
+	Lock();
+	m_SpawnPos = m_Pos;
+	m_SpawnVel = m_Vel;
+	UnLock();
 }
 
 void CCharacterCore::Move()

@@ -240,6 +240,13 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 		for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
 			if (GetPlayer(LoopClientID))
 				SendTeamsState(LoopClientID);
+
+	CCharacter* pChar = Character(ClientID);
+	if(pChar) {
+		pChar->GiveWeapon(WEAPON_RIFLE, Team == 0);
+		if(Team != 0)
+			pChar->SetActiveWeapon(WEAPON_RIFLE);
+	}
 }
 
 void CGameTeams::ForceLeaveTeam(int ClientID)
@@ -633,8 +640,8 @@ void CGameTeams::OnCharacterSpawn(int ClientID)
 {
 	m_Core.SetSolo(ClientID, false);
 
-	if (m_Core.Team(ClientID) >= TEAM_SUPER || !m_TeamLocked[m_Core.Team(ClientID)])
-		SetForceCharacterTeam(ClientID, 0);
+	int Team = m_Core.Team(ClientID);
+	Character(ClientID)->GiveWeapon(WEAPON_RIFLE, Team == 0);
 }
 
 void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
@@ -646,7 +653,6 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 
 	if(!Locked)
 	{
-		SetForceCharacterTeam(ClientID, 0);
 		CheckTeamFinished(Team);
 	}
 	else

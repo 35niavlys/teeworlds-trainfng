@@ -71,9 +71,10 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 			Temp.y = 0;
 		pHit->Core()->m_Vel = Temp;
 	}
-	else if (m_Type == WEAPON_RIFLE)
+ 	else if (m_Type == WEAPON_RIFLE && pHit != pOwnerChar && pHit->m_FreezeTime == 0)
 	{
-		pHit->UnFreeze();
+		GameServer()->CreateSound(pHit->Core()->m_Pos, SOUND_HIT, m_TeamMask);
+		pHit->Freeze();
 	}
 	return true;
 }

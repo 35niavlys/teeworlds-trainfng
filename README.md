@@ -1,25 +1,20 @@
-[![DDraceNetwork](https://ddnet.tw/ddnet-small.png)](https://ddnet.tw) [![CircleCI Build Status](https://circleci.com/gh/ddnet/ddnet/tree/master.png)](https://circleci.com/gh/ddnet/ddnet) [![Travis CI Build Status](https://travis-ci.org/ddnet/ddnet.svg?branch=master)](https://travis-ci.org/ddnet/ddnet) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/foeer8wbynqaqqho?svg=true)](https://ci.appveyor.com/project/def-/ddnet)
-
-Our own flavor of DDRace, a Teeworlds mod. See the [website](https://ddnet.tw) for more information.
-
-Development discussions happen on #ddnet on Quakenet ([Webchat](http://webchat.quakenet.org/?channels=ddnet&uio=d4)) or on [Discord in the developer channel](https://discord.gg/xsEd9xu).
-
-You can get binary releases on the [DDNet website](https://ddnet.tw/downloads/).
+Trainfng is a Teeworlds mod created from [ddnet](https://ddnet.tw).
+The aim of this mod is to be able to train easily to the [fng](https://github.com/fstd/teeworlds) mod.
 
 Cloning
 -------
 
 To clone this repository with full history and external libraries (~350 MB):
 
-    git clone --recursive https://github.com/ddnet/ddnet
+    git clone --recursive https://github.com/35niavlys/teeworlds-trainfng
 
 To clone this repository with full history when you have the necessary libraries on your system already (~220 MB):
 
-    git clone https://github.com/ddnet/ddnet
+    git clone https://github.com/35niavlys/teeworlds-trainfng
 
-To clone this repository with history since we moved the libraries to https://github.com/ddnet/ddnet-libs (~40 MB):
+To clone this repository with history since we moved the libraries to https://github.com/35niavlys/teeworlds-trainfng-libs (~40 MB):
 
-    git clone --shallow-exclude=included-libs https://github.com/ddnet/ddnet
+    git clone --shallow-exclude=included-libs https://github.com/35niavlys/teeworlds-trainfng
 
 To clone the libraries if you have previously cloned DDNet without them:
 
@@ -51,25 +46,6 @@ MySQL (or MariaDB) support in the server is not included in the binary releases 
 
 Note that the bundled MySQL libraries might not work properly on your system. If you run into connection problems with the MySQL server, for example that it connects as root while you chose another user, make sure to install your system libraries for the MySQL client and C++ connector. Make sure that the CMake configuration summary says that it found MySQL libs that were not bundled (no "using bundled libs").
 
-Running tests (Debian/Ubuntu)
------------------------------
-
-In order to run the tests, you need to install the following library `libgtest-dev`.
-
-This library isn't compiled, so you have to do it:
-```bash
-sudo apt install libgtest-dev
-cd /usr/src/gtest
-sudo cmake CMakeLists.txt
-sudo make
- 
-# copy or symlink libgtest.a and libgtest_main.a to your /usr/lib folder
-sudo cp *.a /usr/lib
-```
-
-To run the tests you must target `run_tests` with make:
-`make run_tests`
-
 Building on Windows with Visual Studio
 --------------------------------------
 
@@ -99,30 +75,3 @@ Install `dmg` and `hfsplus` from
 from
 [diskdev\_cmds](http://pkgs.fedoraproject.org/repo/pkgs/hfsplus-tools/diskdev_cmds-540.1.linux3.tar.gz/0435afc389b919027b69616ad1b05709/diskdev_cmds-540.1.linux3.tar.gz)
 to unlock the `package_dmg` target that outputs a macOS disk image.
-
-Importing the official DDNet Database
--------------------------------------
-
-```bash
-$ wget https://ddnet.tw/stats/ddnet-sql.zip
-$ unzip ddnet-sql.zip
-$ yaourt -S mariadb mysql-connector-c++
-$ mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
-$ systemctl start mariadb
-$ mysqladmin -u root password 'PW'
-$ mysql -u root -p'PW'
-MariaDB [(none)]> create database teeworlds; create user 'teeworlds'@'localhost' identified by 'PW2'; grant all privileges on teeworlds.* to 'teeworlds'@'localhost'; flush privileges;
-# this takes a while, you can remove the KEYs in record_race.sql to trade performance in queries
-$ mysql -u teeworlds -p'PW2' teeworlds < ddnet-sql/record_*.sql
-
-$ cat mine.cfg
-sv_use_sql 1
-add_sqlserver r teeworlds record teeworlds "PW2" "localhost" "3306"
-add_sqlserver w teeworlds record teeworlds "PW2" "localhost" "3306"
-
-$ mkdir build
-$ cd build
-$ cmake -DMYSQL=ON ..
-$ make
-$ ./DDNet-Server -f mine.cfg
-```

@@ -74,7 +74,7 @@ endif()
 
 option(WEBSOCKETS "Enable websockets support" OFF)
 option(MYSQL "Enable mysql support" OFF)
-option(CLIENT "Compile client" ON)
+option(CLIENT "Compile client" OFF)
 option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
@@ -94,7 +94,7 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
   src/game/version.h
 )
 
-set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
+set(SERVER_EXECUTABLE trainfng_srv CACHE STRING "Name of the built server executable")
 set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
 
 ########################################################################
@@ -498,7 +498,9 @@ set(DEP_MD5 $<TARGET_OBJECTS:md5>)
 ########################################################################
 
 file(COPY data DESTINATION .)
+file(COPY conf DESTINATION .)
 set(COPY_FILES
+  autoexec_server.cfg
   ${CURL_COPY_FILES}
   ${FREETYPE_COPY_FILES}
   ${OPUSFILE_COPY_FILES}
