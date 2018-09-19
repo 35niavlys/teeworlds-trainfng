@@ -70,7 +70,8 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 	m_JumpedTotal = 0;
 	m_Jumps = 2;
 
-	m_GameCoreLock = lock_create();
+	if (m_GameCoreLock == 0)
+		m_GameCoreLock = lock_create();
 }
 
 void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams, std::map<int, std::vector<vec2> > *pTeleOuts)
@@ -86,7 +87,8 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 	m_JumpedTotal = 0;
 	m_Jumps = 2;
 
-	m_GameCoreLock = lock_create();
+	if (m_GameCoreLock == 0)
+                m_GameCoreLock = lock_create();
 }
 
 void CCharacterCore::Reset()

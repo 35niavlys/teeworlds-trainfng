@@ -274,7 +274,7 @@ private:
 	int m_TileSFlagsB;
 	bool IsRightTeam(int MapIndex);
 
-	LOCK m_GameCoreLock;
+	LOCK m_GameCoreLock = 0;
 };
 
 //input count
