@@ -12,7 +12,7 @@ To clone this repository with full history when you have the necessary libraries
 
     git clone https://github.com/35niavlys/teeworlds-trainfng
 
-To clone this repository with history since we moved the libraries to https://github.com/35niavlys/teeworlds-trainfng-libs (~40 MB):
+To clone this repository with history since we moved the libraries to https://github.com/ddnet/ddnet-libs (~40 MB):
 
     git clone --shallow-exclude=included-libs https://github.com/35niavlys/teeworlds-trainfng
 
