@@ -244,6 +244,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 	CCharacter* pChar = Character(ClientID);
 	if(pChar) {
 		pChar->GiveWeapon(WEAPON_RIFLE, Team == 0);
+		pChar->GiveWeapon(WEAPON_GRENADE, Team == 0);
 		if(Team != 0)
 			pChar->SetActiveWeapon(WEAPON_RIFLE);
 	}
