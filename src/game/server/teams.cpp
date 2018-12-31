@@ -642,6 +642,7 @@ void CGameTeams::OnCharacterSpawn(int ClientID)
 	m_Core.SetSolo(ClientID, false);
 
 	int Team = m_Core.Team(ClientID);
+	Character(ClientID)->GiveWeapon(WEAPON_GRENADE, Team == 0);
 	Character(ClientID)->GiveWeapon(WEAPON_RIFLE, Team == 0);
 }
 
