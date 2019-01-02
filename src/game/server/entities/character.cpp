@@ -2144,7 +2144,6 @@ void CCharacter::DDRaceInit()
 	m_Core.m_Id = GetPlayer()->GetCID();
 	if(g_Config.m_SvTeam == 2)
 	{
-		GameServer()->SendChatTarget(GetPlayer()->GetCID(),"Please join a team before you start");
 		m_LastStartWarning = Server()->Tick();
 	}
 	m_TeleCheckpoint = 0;
