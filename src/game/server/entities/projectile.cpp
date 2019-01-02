@@ -167,7 +167,7 @@ void CProjectile::Tick()
 				GameServer()->CreateSound(ColPos, m_SoundImpact,
 				(m_Owner != -1)? TeamMask : -1LL);
 			}
-			if(pTargetChr)
+			if(pTargetChr && pTargetChr->m_FreezeTime == 0)
 				pTargetChr->Freeze();
 		}
 		else if(pTargetChr && m_Freeze && ((m_Layer == LAYER_SWITCH && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pTargetChr->Team()]) || m_Layer != LAYER_SWITCH))
