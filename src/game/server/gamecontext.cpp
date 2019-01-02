@@ -696,6 +696,9 @@ void CGameContext::OnTick()
 
 			m_apPlayers[i]->Tick();
 			m_apPlayers[i]->PostTick();
+
+			if (GetDDRaceTeam(i) == 0)
+				SendBroadcast(g_Config.m_SvTrainfngTeam0Info, i);
 		}
 	}
 

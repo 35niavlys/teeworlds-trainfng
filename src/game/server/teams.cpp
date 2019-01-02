@@ -243,9 +243,12 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 
 	CCharacter* pChar = Character(ClientID);
 	if(pChar) {
-		pChar->GiveWeapon(WEAPON_RIFLE, Team == 0);
-		pChar->GiveWeapon(WEAPON_GRENADE, Team == 0);
-		if(Team != 0)
+		pChar->GiveWeapon(WEAPON_GRENADE, Team < 50);
+		pChar->GiveWeapon(WEAPON_RIFLE, Team == 0 || Team >= 50);
+
+		if (Team >= 50)
+			pChar->SetActiveWeapon(WEAPON_GRENADE);
+		else if (Team > 0)
 			pChar->SetActiveWeapon(WEAPON_RIFLE);
 	}
 }
@@ -642,8 +645,8 @@ void CGameTeams::OnCharacterSpawn(int ClientID)
 	m_Core.SetSolo(ClientID, false);
 
 	int Team = m_Core.Team(ClientID);
-	Character(ClientID)->GiveWeapon(WEAPON_GRENADE, Team == 0);
-	Character(ClientID)->GiveWeapon(WEAPON_RIFLE, Team == 0);
+	Character(ClientID)->GiveWeapon(WEAPON_GRENADE, Team < 50);
+	Character(ClientID)->GiveWeapon(WEAPON_RIFLE, Team == 0 || Team >= 50);
 }
 
 void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)

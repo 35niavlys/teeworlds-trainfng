@@ -410,3 +410,6 @@ MACRO_CONFIG_INT(GfxEnableTextureUnitOptimization, gfx_enable_texture_unit_optim
 MACRO_CONFIG_INT(GfxEnableTextureUnitOptimization, gfx_enable_texture_unit_optimization, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use multiple texture units, instead of only one.")
 #endif
 MACRO_CONFIG_INT(GfxUsePreinitBuffer, gfx_use_preinitialized_buffer, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT, "Use only one buffer for data, that is uploaded to the GPU(might help when using an iGPUs).")
+
+// trainfng
+MACRO_CONFIG_STR(SvTrainfngTeam0Info, sv_trainfng_team_0_info, 128, "Welcome on trainfng\nTeam 01-49: laser\nTeam 50-63: grenade", CFGFLAG_SERVER, "Broadcast to display to players on team 0")
