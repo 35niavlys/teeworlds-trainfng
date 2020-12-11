@@ -25,6 +25,6 @@ jobs:
       run: |
         mkdir clang-tidy
         cd clang-tidy
-        cmake -G "Unix Makefiles" -DCMAKE_CXX_CLANG_TIDY="clang-tidy;-warnings-as-errors=*" -DCMAKE_C_CLANG_TIDY="clang-tidy;-warnings-as-errors=*" -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. .. || cat ./CMakeFiles/*.log
+        cmake -G "Unix Makefiles" -DCMAKE_CXX_CLANG_TIDY="clang-tidy;-warnings-as-errors=*" -DCMAKE_C_CLANG_TIDY="clang-tidy;-warnings-as-errors=*" -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. .. || { ls -1 ./CMakeFiles/*.log | while read FILE ; do sed -e "s#^#$FILE: #" $FILE ; done ; false ; }
         cmake --build . --config Debug --parallel --target everything -- --keep-going
 
