@@ -7,8 +7,6 @@
 
 int main(int argc, const char **argv)
 {
-	dbg_logger_stdout();
-	
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
 	int Index, ID = 0, Type = 0, Size;
 	void *pPtr;
@@ -20,7 +18,6 @@ int main(int argc, const char **argv)
 		return -1;
 
 	str_format(aFileName, sizeof(aFileName), "%s", argv[2]);
-	dbg_msg("map_update_fng", aFileName);
 
 	if(!DataFile.Open(pStorage, argv[1], IStorage::TYPE_ABSOLUTE))
 		return -1;
