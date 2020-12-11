@@ -119,7 +119,6 @@ jobs:
       run: |
         cd release
         ${{ matrix.cmake-path }}cmake --build . --config Release ${{ matrix.build-args }} --target package_default
-        ls -l
         mkdir artifacts
         mv ${{ matrix.package-file }} artifacts
 
