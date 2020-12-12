@@ -19,7 +19,7 @@ jobs:
         - os: ubuntu-latest
           cmake-args: -G "Unix Makefiles"
           build-args: --parallel
-          package-file: ""-*-linux_x86_64.tar.xz"
+          package-file: "-*-linux_x86_64.tar.xz"
           fancy: true
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
