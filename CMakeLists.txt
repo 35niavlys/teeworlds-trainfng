@@ -86,9 +86,7 @@ option(INFORM_UPDATE "Inform about available updates" ON)
 option(VIDEORECORDER "Enable video recording support via FFmpeg" OFF)
 option(UPNP "Enable UPnP support" OFF)
 option(ANTIBOT "Enable support for a dynamic anticheat library" OFF)
-option(CLIENT "Compile client" OFF)
 option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
-option(STEAM "Build the Steam release version" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
 
@@ -123,7 +121,6 @@ else()
 endif()
 
 set(SERVER_EXECUTABLE TrainFNG-Server CACHE STRING "Name of the built server executable")
-set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
 
 ########################################################################
 # Compiler flags
@@ -274,7 +271,7 @@ function(set_own_rpath TARGET)
 endfunction()
 
 if(NOT TARGET_OS STREQUAL "windows" AND NOT TARGET_OS STREQUAL "mac" AND CMAKE_VERSION VERSION_LESS 3.8)
-  if((CLIENT AND STEAM) OR ANTIBOT)
+  if(ANTIBOT)
     message(STATUS "Can't set BUILD_RPATH in CMake before 3.8, pass -Wl,-rpath,'$ORIGIN' manually if you wish to emulate this. Or just install a newer version of CMake...")
   endif()
 endif()
@@ -454,9 +451,6 @@ if(WEBSOCKETS)
   show_dependency_status("Websockets" WEBSOCKETS)
 endif()
 
-if(CLIENT AND NOT(CURL_FOUND))
-  message(SEND_ERROR "You must install Curl to compile DDNet")
-endif()
 if(NOT(PYTHONINTERP_FOUND))
   message(SEND_ERROR "You must install Python to compile DDNet")
 endif()
@@ -476,21 +470,6 @@ if(UPNP AND NOT(MINIUPNPC_FOUND))
   message(SEND_ERROR "You must install miniupnpc to compile the DDNet server with UPnP support")
 endif()
 
-if(CLIENT AND NOT(FREETYPE_FOUND))
-  message(SEND_ERROR "You must install Freetype to compile the DDNet client")
-endif()
-if(CLIENT AND NOT(OGG_FOUND))
-  message(SEND_ERROR "You must install Ogg to compile the DDNet client")
-endif()
-if(CLIENT AND NOT(OPUS_FOUND))
-  message(SEND_ERROR "You must install Opus to compile the DDNet client")
-endif()
-if(CLIENT AND NOT(OPUSFILE_FOUND))
-  message(SEND_ERROR "You must install Opusfile to compile the DDNet client")
-endif()
-if(CLIENT AND NOT(SDL2_FOUND))
-  message(SEND_ERROR "You must install SDL2 to compile the DDNet client")
-endif()
 if(NOT(GTEST_FOUND))
   if(DOWNLOAD_GTEST)
     if(GIT_FOUND)
@@ -505,27 +484,17 @@ if(NOT(GTEST_FOUND))
 endif()
 
 if(TARGET_OS STREQUAL "windows")
-  set(PLATFORM_CLIENT)
-  set(PLATFORM_CLIENT_LIBS opengl32 winmm)
   set(PLATFORM_LIBS ws2_32) # Windows sockets
 elseif(TARGET_OS STREQUAL "mac")
   find_library(CARBON Carbon)
   find_library(COCOA Cocoa)
   find_library(OPENGL OpenGL)
   find_library(SECURITY Security)
-  set(PLATFORM_CLIENT
-    src/osx/notifications.mm
-    src/osxlaunch/client.m
-  )
-  set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
   set(PLATFORM_LIBS ${CARBON} ${SECURITY})
 else()
   find_package(Notify)
   find_package(OpenGL)
   find_package(X11)
-  set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY} ${X11_X11_LIB} ${NOTIFY_LIBRARIES})
-  set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR} ${X11_X11_INCLUDE_PATH} ${NOTIFY_INCLUDE_DIRS})
-  set(PLATFORM_CLIENT)
   if(TARGET_OS STREQUAL "linux")
     set(PLATFORM_LIBS rt) # clock_gettime for glibc < 2.17
   else()
@@ -1606,280 +1575,6 @@ list(APPEND TARGETS_OWN engine-shared game-shared)
 
 
 ########################################################################
-# CLIENT
-########################################################################
-
-if(CLIENT)
-  # Sources
-  set_src(STEAMAPI_SRC GLOB_RECURSE src/steam
-    steam_api_flat.h
-    steam_api_stub.cpp
-  )
-
-  if(STEAM OR TARGET_OS STREQUAL "windows" OR TARGET_OS STREQUAL "mac")
-    set(STEAMAPI_KIND SHARED)
-  else()
-    set(STEAMAPI_KIND STATIC)
-  endif()
-  set(TARGET_STEAMAPI steam_api)
-  add_library(${TARGET_STEAMAPI} ${STEAMAPI_KIND} ${STEAMAPI_SRC})
-  list(APPEND TARGETS_OWN ${TARGET_STEAMAPI})
-
-  set_src(ENGINE_CLIENT GLOB src/engine/client
-    backend_sdl.cpp
-    backend_sdl.h
-    client.cpp
-    client.h
-    demoedit.cpp
-    demoedit.h
-    friends.cpp
-    friends.h
-    ghost.cpp
-    ghost.h
-    graphics_threaded.cpp
-    graphics_threaded.h
-    http.cpp
-    http.h
-    input.cpp
-    input.h
-    keynames.h
-    notifications.cpp
-    notifications.h
-    opengl_sl.cpp
-    opengl_sl.h
-    opengl_sl_program.cpp
-    opengl_sl_program.h
-    serverbrowser.cpp
-    serverbrowser.h
-    sound.cpp
-    sound.h
-    steam.cpp
-    text.cpp
-    updater.cpp
-    updater.h
-    video.cpp
-    video.h
-  )
-  set_src(GAME_CLIENT GLOB_RECURSE src/game/client
-    animstate.cpp
-    animstate.h
-    component.h
-    components/background.cpp
-    components/background.h
-    components/binds.cpp
-    components/binds.h
-    components/broadcast.cpp
-    components/broadcast.h
-    components/camera.cpp
-    components/camera.h
-    components/chat.cpp
-    components/chat.h
-    components/console.cpp
-    components/console.h
-    components/controls.cpp
-    components/controls.h
-    components/countryflags.cpp
-    components/countryflags.h
-    components/damageind.cpp
-    components/damageind.h
-    components/debughud.cpp
-    components/debughud.h
-    components/effects.cpp
-    components/effects.h
-    components/emoticon.cpp
-    components/emoticon.h
-    components/flow.cpp
-    components/flow.h
-    components/ghost.cpp
-    components/ghost.h
-    components/hud.cpp
-    components/hud.h
-    components/items.cpp
-    components/items.h
-    components/killmessages.cpp
-    components/killmessages.h
-    components/mapimages.cpp
-    components/mapimages.h
-    components/maplayers.cpp
-    components/maplayers.h
-    components/mapsounds.cpp
-    components/mapsounds.h
-    components/menu_background.cpp
-    components/menu_background.h
-    components/menus.cpp
-    components/menus.h
-    components/menus_browser.cpp
-    components/menus_demo.cpp
-    components/menus_ingame.cpp
-    components/menus_settings.cpp
-    components/menus_settings_assets.cpp
-    components/menus_start.cpp
-    components/motd.cpp
-    components/motd.h
-    components/nameplates.cpp
-    components/nameplates.h
-    components/particles.cpp
-    components/particles.h
-    components/players.cpp
-    components/players.h
-    components/race_demo.cpp
-    components/race_demo.h
-    components/scoreboard.cpp
-    components/scoreboard.h
-    components/skins.cpp
-    components/skins.h
-    components/sounds.cpp
-    components/sounds.h
-    components/spectator.cpp
-    components/spectator.h
-    components/statboard.cpp
-    components/statboard.h
-    components/voting.cpp
-    components/voting.h
-    gameclient.cpp
-    gameclient.h
-    lineinput.cpp
-    lineinput.h
-    prediction/entities/character.cpp
-    prediction/entities/character.h
-    prediction/entities/laser.cpp
-    prediction/entities/laser.h
-    prediction/entities/pickup.cpp
-    prediction/entities/pickup.h
-    prediction/entities/projectile.cpp
-    prediction/entities/projectile.h
-    prediction/entity.cpp
-    prediction/entity.h
-    prediction/gameworld.cpp
-    prediction/gameworld.h
-    race.cpp
-    race.h
-    render.cpp
-    render.h
-    render_map.cpp
-    skin.h
-    ui.cpp
-    ui.h
-  )
-  set_src(GAME_EDITOR GLOB src/game/editor
-    auto_map.cpp
-    auto_map.h
-    editor.cpp
-    editor.h
-    explanations.cpp
-    io.cpp
-    layer_game.cpp
-    layer_quads.cpp
-    layer_sounds.cpp
-    layer_tiles.cpp
-    popups.cpp
-  )
-  set(GAME_GENERATED_CLIENT
-    src/game/generated/client_data.cpp
-    src/game/generated/client_data.h
-    src/game/generated/client_data7.cpp
-    src/game/generated/client_data7.h
-  )
-  set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
-
-  set(DEPS_CLIENT ${DEPS} ${GLEW_DEP} ${PNGLITE_DEP} ${WAVPACK_DEP})
-
-  # Libraries
-  set(LIBS_CLIENT
-    ${LIBS}
-    ${CURL_LIBRARIES}
-    ${FREETYPE_LIBRARIES}
-    ${GLEW_LIBRARIES}
-    ${PNGLITE_LIBRARIES}
-    ${SDL2_LIBRARIES}
-    ${WAVPACK_LIBRARIES}
-    ${FFMPEG_LIBRARIES}
-
-    # Order of these three is important.
-    ${OPUSFILE_LIBRARIES}
-    ${OPUS_LIBRARIES}
-    ${OGG_LIBRARIES}
-
-    ${TARGET_STEAMAPI}
-
-    ${PLATFORM_CLIENT_LIBS}
-
-    # Add pthreads (on non-Windows) at the end, so that other libraries can depend
-    # on it.
-    ${CMAKE_THREAD_LIBS_INIT}
-  )
-
-  if(TARGET_OS STREQUAL "windows")
-    set(CLIENT_ICON "other/icons/DDNet.rc")
-    if(NOT MINGW)
-      set(CLIENT_MANIFEST "other/manifest/DDNet.manifest")
-    else()
-      set(CLIENT_MANIFEST "other/manifest/DDNet.rc")
-      set_target_properties(${TARGET_STEAMAPI} PROPERTIES PREFIX "")
-    endif()
-  else()
-    set(CLIENT_ICON)
-    set(CLIENT_MANIFEST)
-  endif()
-
-  # Target
-  set(TARGET_CLIENT ${CLIENT_EXECUTABLE})
-  add_executable(${TARGET_CLIENT}
-    ${CLIENT_SRC}
-    ${CLIENT_ICON}
-    ${CLIENT_MANIFEST}
-    ${DEPS_CLIENT}
-    $<TARGET_OBJECTS:engine-shared>
-    $<TARGET_OBJECTS:game-shared>
-  )
-  target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
-
-  target_include_directories(${TARGET_CLIENT} PRIVATE
-    ${CURL_INCLUDE_DIRS}
-    ${FREETYPE_INCLUDE_DIRS}
-    ${GLEW_INCLUDE_DIRS}
-    ${OGG_INCLUDE_DIRS}
-    ${OPUSFILE_INCLUDE_DIRS}
-    ${OPUS_INCLUDE_DIRS}
-    ${PNGLITE_INCLUDE_DIRS}
-    ${SDL2_INCLUDE_DIRS}
-    ${WAVPACK_INCLUDE_DIRS}
-    ${FFMPEG_INCLUDE_DIRS}
-
-    ${PLATFORM_CLIENT_INCLUDE_DIRS}
-  )
-
-  if(STEAMAPI_KIND STREQUAL SHARED)
-    set_own_rpath(${TARGET_CLIENT})
-  endif()
-
-  set(PARAMS "${WAVPACK_INCLUDE_DIRS};${WAVPACK_INCLUDE_DIRS}")
-  if(NOT(WAVPACK_OPEN_FILE_INPUT_EX_PARAMS STREQUAL PARAMS))
-    unset(WAVPACK_OPEN_FILE_INPUT_EX CACHE)
-  endif()
-  set(WAVPACK_OPEN_FILE_INPUT_EX_PARAMS "${PARAMS}" CACHE INTERNAL "")
-
-  set(CMAKE_REQUIRED_INCLUDES ${ORIGINAL_CMAKE_REQUIRED_INCLUDES} ${WAVPACK_INCLUDE_DIRS})
-  set(CMAKE_REQUIRED_LIBRARIES ${ORIGINAL_CMAKE_REQUIRED_LIBRARIES} ${WAVPACK_LIBRARIES})
-  check_symbol_exists(WavpackOpenFileInputEx wavpack.h WAVPACK_OPEN_FILE_INPUT_EX)
-  check_symbol_exists(WavpackCloseFile wavpack.h WAVPACK_CLOSE_FILE)
-  set(CMAKE_REQUIRED_INCLUDES ${ORIGINAL_CMAKE_REQUIRED_INCLUDES})
-  set(CMAKE_REQUIRED_LIBRARIES ${ORIGINAL_CMAKE_REQUIRED_LIBRARIES})
-
-  if(WAVPACK_OPEN_FILE_INPUT_EX)
-    target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_WAVPACK_OPEN_FILE_INPUT_EX)
-  endif()
-
-  if(WAVPACK_CLOSE_FILE)
-	  target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_WAVPACK_CLOSE_FILE)
-  endif()
-
-  list(APPEND TARGETS_OWN ${TARGET_CLIENT})
-  list(APPEND TARGETS_LINK ${TARGET_CLIENT})
-endif()
-
-
-########################################################################
 # SERVER
 ########################################################################
 
@@ -2291,7 +1986,6 @@ endforeach()
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ${PROJECT_NAME})
 
 set(CPACK_TARGETS
-  ${TARGET_CLIENT}
   ${TARGET_SERVER}
   config_retrieve
   config_store
@@ -2300,9 +1994,6 @@ set(CPACK_TARGETS
   map_diff
   map_extract
 )
-if(STEAMAPI_KIND STREQUAL SHARED)
-  list(APPEND CPACK_TARGETS ${TARGET_STEAMAPI})
-endif()
 set(CPACK_DIRS data)
 set(CPACK_FILES
   license.txt
@@ -2317,20 +2008,11 @@ endif()
 if(NOT DEV)
   include(GNUInstallDirs)
   install(DIRECTORY data DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/ddnet COMPONENT data)
-  install(TARGETS ${TARGET_CLIENT} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT client)
-  if(STEAMAPI_KIND STREQUAL SHARED)
-    install(TARGETS ${TARGET_STEAMAPI} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ddnet COMPONENT client)
-  endif()
   install(TARGETS ${TARGET_SERVER} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT server)
   if(ANTIBOT)
     install(TARGETS ${TARGET_ANTIBOT} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ddnet COMPONENT server)
   endif()
   install(TARGETS ${TARGETS_TOOLS} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ddnet COMPONENT tools)
-  install(FILES other/ddnet.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications COMPONENT client)
-  install(FILES other/ddnet.appdata.xml DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/metainfo COMPONENT client)
-  foreach(SIZE 16 32 48 128 256 512)
-    install(FILES other/icons/DDNet_${SIZE}x${SIZE}x32.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME ddnet.png COMPONENT client)
-  endforeach()
 endif()
 
 if(DEV)
@@ -2345,10 +2027,8 @@ else()
 endif()
 
 set(PACKAGE_TARGETS)
-if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
-  file(MAKE_DIRECTORY bundle/client/)
+if(DMGTOOLS_FOUND OR HDIUTIL)
   file(MAKE_DIRECTORY bundle/server/)
-  configure_file(other/bundle/client/Info.plist.in bundle/client/Info.plist)
   configure_file(other/bundle/server/Info.plist.in bundle/server/Info.plist)
 
   if(HDIUTIL)
@@ -2358,11 +2038,6 @@ if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
   endif()
   set(DMG_TMPDIR pack_${CPACK_PACKAGE_FILE_NAME}_dmg)
   set(DMG_MKDIRS
-    ${TARGET_CLIENT}.app
-    ${TARGET_CLIENT}.app/Contents
-    ${TARGET_CLIENT}.app/Contents/Frameworks
-    ${TARGET_CLIENT}.app/Contents/MacOS
-    ${TARGET_CLIENT}.app/Contents/Resources
     ${TARGET_SERVER}.app
     ${TARGET_SERVER}.app/Contents
     ${TARGET_SERVER}.app/Contents/MacOS
@@ -2377,42 +2052,6 @@ if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
   add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.dmg
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${DMG_TMPDIR}
     ${DMG_MKDIR_COMMANDS}
-
-    # CLIENT
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/data
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${TARGET_CLIENT}.icns ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/
-    COMMAND ${CMAKE_COMMAND} -E copy bundle/client/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/client/PkgInfo ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET_CLIENT}> ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/mac/lib64/SDL2.framework ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/SDL2.framework
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/mac/lib64/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/mac/lib64/libavcodec.58.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/mac/lib64/libavformat.58.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/mac/lib64/libavutil.56.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/mac/lib64/libswresample.3.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/mac/lib64/libswscale.5.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/websockets/mac/lib64/libwebsockets.17.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/libsteam_api.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/libavcodec.58.dylib
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/libavformat.58.dylib
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/libswscale.5.dylib
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/libswresample.3.dylib
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavcodec.58.dylib @rpath/libavcodec.58.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavcodec.58.dylib @rpath/libavcodec.58.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/libavformat.58.dylib
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavformat.58.dylib @rpath/libavformat.58.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavutil.56.dylib @rpath/libavutil.56.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavutil.56.dylib @rpath/libavutil.56.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/libavcodec.58.dylib
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavutil.56.dylib @rpath/libavutil.56.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/libavformat.58.dylib
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavutil.56.dylib @rpath/libavutil.56.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/libswscale.5.dylib
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libavutil.56.dylib @rpath/libavutil.56.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/libswresample.3.dylib
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libswscale.5.dylib @rpath/libswscale.5.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libswresample.3.dylib @rpath/libswresample.3.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/lib/libfreetype.6.dylib @rpath/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
-    # TODO: Cleaner solution than hardcoding paths
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /home/deen/isos/ddnet/debian6/mac64/libwebsockets-4.1.1/lib/libwebsockets.17.dylib @rpath/libwebsockets.17.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change ${PROJECT_BINARY_DIR}/libsteam_api.dylib @rpath/libsteam_api.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change ${PROJECT_BINARY_DIR}/libsteam_api.dylib @rpath/libsteam_api.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/libsteam_api.dylib
 
     # SERVER
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data/maps ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/Resources/data/maps
@@ -2431,16 +2070,11 @@ if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
     COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/dmg.py create ${DMG_PARAMS} ${CPACK_PACKAGE_FILE_NAME}.dmg ${CPACK_PACKAGE_FILE_NAME} ${DMG_TMPDIR}
 
     DEPENDS
-      ${TARGET_CLIENT}
-      ${TARGET_STEAMAPI}
       ${TARGET_SERVER_LAUNCHER}
       ${TARGET_SERVER}
-      ${PROJECT_BINARY_DIR}/bundle/client/Info.plist
       ${PROJECT_BINARY_DIR}/bundle/server/Info.plist
       data
-      other/bundle/client/PkgInfo
       other/bundle/server/PkgInfo
-      other/icons/${TARGET_CLIENT}.icns
       other/icons/${TARGET_SERVER}.icns
       scripts/dmg.py
   )
@@ -2615,14 +2249,11 @@ foreach(target ${TARGETS_OWN})
     target_compile_definitions(${target} PRIVATE CONF_SQL)
     target_include_directories(${target} PRIVATE ${MYSQL_INCLUDE_DIRS})
   endif()
-  if(AUTOUPDATE AND NOT STEAM)
+  if(AUTOUPDATE)
     target_compile_definitions(${target} PRIVATE CONF_AUTOUPDATE)
   endif()
-  if(INFORM_UPDATE AND NOT STEAM)
+  if(INFORM_UPDATE)
     target_compile_definitions(${target} PRIVATE CONF_INFORM_UPDATE)
-  endif()
-  if(STEAM)
-    target_compile_definitions(${target} PRIVATE PLATFORM_SUFFIX="-steam")
   endif()
   if(VERSION)
     target_compile_definitions(${target} PRIVATE GAME_RELEASE_VERSION="${VERSION}")
