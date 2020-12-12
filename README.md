@@ -1,4 +1,4 @@
- Trainfng is a Teeworlds mod created from [ddnet](https://ddnet.tw).
+Trainfng is a Teeworlds mod created from [ddnet](https://ddnet.tw).
 The aim of this mod is to be able to train easily to the [fng](https://github.com/fstd/teeworlds) mod.
 
 Cloning
@@ -6,15 +6,15 @@ Cloning
 
 To clone this repository with full history and external libraries (~350 MB):
 
-    git clone --recursive https://github.com/ddnet/ddnet
+    git clone --recursive https://github.com/35niavlys/teeworlds-trainfng
 
 To clone this repository with full history when you have the necessary libraries on your system already (~220 MB):
 
-    git clone https://github.com/ddnet/ddnet
+    git clone https://github.com/35niavlys/teeworlds-trainfng
 
 To clone this repository with history since we moved the libraries to https://github.com/ddnet/ddnet-libs (~40 MB):
 
-    git clone --shallow-exclude=included-libs https://github.com/ddnet/ddnet
+    git clone --shallow-exclude=included-libs https://github.com/35niavlys/teeworlds-trainfng
 
 To clone the libraries if you have previously cloned DDNet without them:
 
@@ -62,17 +62,6 @@ Whether to enable WebSocket support for server. Setting to ON requires the `libw
 Whether to enable MySQL/MariaDB support for server. Requires at least MySQL 8.0 or MariaDB 10.2. Setting to ON requires the `libmariadbclient-dev`, `libmysqlcppconn-dev` and `libboost-dev` libraries installed, which are also provided as bundled libraries for the common platforms. Default value is OFF.
 
    Note that the bundled MySQL libraries might not work properly on your system. If you run into connection problems with the MySQL server, for example that it connects as root while you chose another user, make sure to install your system libraries for the MySQL client and C++ connector. Make sure that the CMake configuration summary says that it found MySQL libs that were not bundled (no "using bundled libs").
-
-* **-DAUTOUPDATE=[ON|OFF]** <br>
-Whether to enable the autoupdater. Packagers may want to disable this for their packages. Default value is ON for Windows and Linux.
-
-* **-DCLIENT=[ON|OFF]** <br>
-Whether to enable client compilation. If set to OFF, DDNet will not depend on Curl, Freetype, Ogg, Opus, Opusfile, and SDL2. Default value is ON.
-
-* **-DVIDEORECORDER=[ON|OFF]** <br>
-Whether to add video recording support using FFmpeg to the client. You can use command `start_video` and `stop_video` to start and stop conversion from demo to mp4. This feature is currently experimental and not enabled by default.
-
-Dependencies needed on debian: `libx264-dev libavfilter-dev libavdevice-dev libavformat-dev libavcodec-extra libavutil-dev`
 
 * **-DDOWNLOAD_GTEST=[ON|OFF]** <br>
 Whether to download and compile GTest. Useful if GTest is not installed and, for Linux users, there is no suitable package providing it. Default value is OFF.
@@ -185,33 +174,3 @@ $ ./TrainFNG-Server -f mine.cfg
 <a href="https://repology.org/metapackage/ddnet/versions">
     <img src="https://repology.org/badge/vertical-allrepos/ddnet.svg?header=" alt="Packaging status" align="right">
 </a>
-
-Installation from Repository
------------------
-
-Debian/Ubuntu
-
-```bash
-$ apt-get install ddnet
-
-```
-
-MacOS
-
-```bash
-$ brew cask install ddnet
-```
-
-Fedora
-
-```bash
-$ dnf install ddnet
-```
-
-Arch Linux
-
-```bash
-$ yay -S ddnet
-```
-
-
