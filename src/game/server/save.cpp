@@ -321,7 +321,7 @@ int CSaveTee::FromString(const char *String)
 		"%36s\t"
 		"%d\t%d"
 		"%d\t%d\t%d\t%d\t"
-		"%d",
+		"%d\t%d\t%d\t%d\t%d\t%d",
 		m_aName, &m_Alive, &m_Paused, &m_NeededFaketuning, &m_TeeFinished, &m_IsSolo,
 		// weapons
 		&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Ammocost, &m_aWeapons[0].m_Got,
@@ -352,7 +352,7 @@ int CSaveTee::FromString(const char *String)
 		m_aGameUuid,
 		&m_HookedPlayer, &m_NewHook,
 		&m_InputDirection, &m_InputJump, &m_InputFire, &m_InputHook,
-		&m_ReloadTimer);
+		&m_ReloadTimer[0], &m_ReloadTimer[1], &m_ReloadTimer[2], &m_ReloadTimer[3], &m_ReloadTimer[4], &m_ReloadTimer[5]);
 	switch(Num) // Don't forget to update this when you save / load more / less.
 	{
 	case 96:
