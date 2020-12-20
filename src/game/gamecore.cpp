@@ -456,7 +456,6 @@ void CCharacterCore::Tick(bool UseInput)
 	UnLock();
 }
 
-
 void CCharacterCore::PostTick()
 {
 	// apply velocity difference caused by external forces AFTER the tick
