@@ -634,6 +634,7 @@ static void Evolve(CNetObj_Character *pCharacter, int Tick)
 	{
 		pCharacter->m_Tick++;
 		TempCore.Tick(false);
+		TempCore.PostTick();
 		TempCore.Move();
 		TempCore.Quantize();
 	}
@@ -2455,6 +2456,8 @@ void CGameClient::DetectStrongHook()
 					ToChar.Tick(false);
 					FromChar.Tick(false);
 				}
+				FromChar.PostTick();
+				ToChar.PostTick();
 				FromChar.Move();
 				FromChar.Quantize();
 				ToChar.Move();

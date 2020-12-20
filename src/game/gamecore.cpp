@@ -84,6 +84,7 @@ void CCharacterCore::Reset()
 		m_GameCoreLock = lock_create();
 	m_Pos = vec2(0, 0);
 	m_Vel = vec2(0, 0);
+	m_VelDiff = vec2(0, 0);
 	m_NewHook = false;
 	m_HookPos = vec2(0, 0);
 	m_HookDir = vec2(0, 0);
@@ -205,9 +206,9 @@ void CCharacterCore::Tick(bool UseInput)
 
 	// add the speed modification according to players wanted direction
 	if(m_Direction < 0)
-		m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, -Accel);
+		m_Vel.x += SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, -Accel);
 	if(m_Direction > 0)
-		m_Vel.x = SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, Accel);
+		m_Vel.x += SaturatedAdd(-MaxSpeed, MaxSpeed, m_Vel.x, Accel);
 	if(m_Direction == 0)
 		m_Vel.x *= Friction;
 
@@ -426,15 +427,14 @@ void CCharacterCore::Tick(bool UseInput)
 						float Accel = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookDragAccel * (Distance / m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookLength);
 						float DragSpeed = m_pWorld->m_Tuning[g_Config.m_ClDummy].m_HookDragSpeed;
 
-						vec2 Temp;
 						// add force to the hooked player
-						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, Accel * Dir.x * 1.5f);
-						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, Accel * Dir.y * 1.5f);
-						pCharCore->m_Vel = ClampVel(pCharCore->m_MoveRestrictions, Temp);
+						vec2 Temp = pCharCore->m_VelDiff;
+						Temp.x += SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, Accel * Dir.x * 1.5f);
+						Temp.y += SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, Accel * Dir.y * 1.5f);
+						pCharCore->m_VelDiff = ClampVel(pCharCore->m_MoveRestrictions, Temp);
 						// add a little bit force to the guy who has the grip
-						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -Accel * Dir.x * 0.25f);
-						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -Accel * Dir.y * 0.25f);
-						m_Vel = ClampVel(m_MoveRestrictions, Temp);
+						m_Vel.x += SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -Accel * Dir.x * 0.25f);
+						m_Vel.y += SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -Accel * Dir.y * 0.25f);
 					}
 				}
 			}
@@ -454,6 +454,15 @@ void CCharacterCore::Tick(bool UseInput)
 	m_SpawnPos = m_Pos;
 	m_SpawnVel = m_Vel;
 	UnLock();
+}
+
+
+void CCharacterCore::PostTick()
+{
+	// apply velocity difference caused by external forces AFTER the tick
+	// to prevent errors in physics calculation (e.g different hook strengths)
+	m_Vel += m_VelDiff;
+	m_VelDiff = vec2(0, 0);
 }
 
 void CCharacterCore::Move()
