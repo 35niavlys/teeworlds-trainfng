@@ -1216,8 +1216,8 @@ void CGameContext::OnClientEnter(int ClientID)
 		}
 
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
-		SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CHAT_SIX);
+		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s with %s client", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()), Server()->IsSixup(ClientID) ? "0.7" : "0.6");
+		SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CHAT_SIX | CHAT_SIXUP);
 
 		SendChatTarget(ClientID, "TrainFNG Mod. Version: " GAME_VERSION);
 		SendChatTarget(ClientID, "Say /info for more info");
