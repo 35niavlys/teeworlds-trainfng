@@ -41,7 +41,7 @@ int main(int argc, const char **argv)
 	{
 		pPtr = DataFile.GetItem(Index, &Type, &ID);
 		Size = DataFile.GetItemSize(Index);
-		
+
 		// update outdated index
 		if(Type == MAPITEMTYPE_LAYER)
 		{
