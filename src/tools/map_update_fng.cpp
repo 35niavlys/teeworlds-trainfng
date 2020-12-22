@@ -47,7 +47,7 @@ int main(int argc, const char **argv)
 		{
 			CMapItemLayerTilemap *pTilemap = (CMapItemLayerTilemap *)pPtr;
 
-			if (pTilemap->m_Flags & TILESLAYERFLAG_GAME)
+			if(pTilemap->m_Flags & TILESLAYERFLAG_GAME)
 			{
 				CTile *pTiles = (CTile *)DataFile.GetData(pTilemap->m_Data);
 
