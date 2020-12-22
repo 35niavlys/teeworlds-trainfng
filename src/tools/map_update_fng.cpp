@@ -36,34 +36,33 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	char aGame[16];
-	str_format(aGame, sizeof(aGame), "Game");
-
 	// add all items
 	for(Index = 0; Index < DataFile.NumItems(); Index++)
 	{
 		pPtr = DataFile.GetItem(Index, &Type, &ID);
 		Size = DataFile.GetItemSize(Index);
-
+		
 		// update outdated index
 		if(Type == MAPITEMTYPE_LAYER)
 		{
-			CMapItemLayerTilemap *pTileMap = (CMapItemLayerTilemap *)pPtr;
-			char aName[16];
-			IntsToStr(pTileMap->m_aName, sizeof(pTileMap->m_aName) / sizeof(int), aName);
+			CMapItemLayerTilemap *pTilemap = (CMapItemLayerTilemap *)pPtr;
 
-			if(str_comp(aGame, aName) == 0)
+			if (pTilemap->m_Flags & TILESLAYERFLAG_GAME)
 			{
-				CTile *pTiles = (CTile *)DataFile.GetData(pTileMap->m_Data);
+				CTile *pTiles = (CTile *)DataFile.GetData(pTilemap->m_Data);
 
-				for(int y = 0; y < pTileMap->m_Height; y++)
+				if(pTilemap->m_Image == -1)
 				{
-					for(int x = 0; x < pTileMap->m_Width; x++)
+					for(int y = 0; y < pTilemap->m_Height; y++)
 					{
-						int Index = pTiles[y * pTileMap->m_Width + x].m_Index;
-						if(Index >= 208 && Index <= 210)
+						for(int x = 0; x < pTilemap->m_Width; x++)
 						{
-							pTiles[y * pTileMap->m_Width + x].m_Index -= 200;
+							int Index = pTiles[y * pTilemap->m_Width + x].m_Index;
+							if(Index >= 208 && Index <= 210)
+							{
+								dbg_msg("map_update_fng", " - old index changed (%i)", pTiles[y * pTilemap->m_Width + x].m_Index);
+								pTiles[y * pTilemap->m_Width + x].m_Index -= 200;
+							}
 						}
 					}
 				}
